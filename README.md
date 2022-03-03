@@ -46,7 +46,7 @@ builder
     .AddMsSqlClients(configuration: builder.Configuration);
 ```
 
-**ValuesController.cs**
+**ExampleController.cs**
 ```
 using ByteTerrace.Ouroboros.Database;
 using Microsoft.AspNetCore.Authorization;
