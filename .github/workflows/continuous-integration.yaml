@@ -1,0 +1,48 @@
+name: 'ByteTerrace.Ouroboros.Database.SqlClient'
+on:
+  workflow_dispatch:
+    inputs:
+      buildConfiguration:
+        description: 'Build Configuration'
+        default: 'Release'
+        options:
+        - Release
+        required: true
+        type: choice
+      buildVerbosity:
+        description: 'Build Verbosity'
+        default: 'minimal'
+        options:
+        - minimal
+        required: true
+        type: choice
+jobs:
+  build:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: 'checkout ByteTerrace.Ouroboros.Database.SqlClient repository'
+        uses: 'actions/checkout@v2'
+        with:
+          clean: true
+          fetch-depth: 1
+          lfs: false
+          path: '${{ github.workspace }}'
+          submodules: false
+      - name: 'setup .NET SDK ${{ matrix.dotnet-version }}'
+        uses: 'actions/setup-dotnet@v1'
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+      - name: 'run .NET restore'
+        run: 'dotnet restore "${{ github.workspace }}/Project/ByteTerrace.Ouroboros.Database.SqlClient.csproj" --nologo --verbosity ${{ github.event.inputs.buildVerbosity }}'
+      - name: 'run .NET build'
+        run: 'dotnet build "${{ github.workspace }}/Project/ByteTerrace.Ouroboros.Database.SqlClient.csproj" --configuration ${{ github.event.inputs.buildConfiguration }} --nologo --no-restore --verbosity ${{ github.event.inputs.buildVerbosity }}'
+      - name: 'upload NuGet packages artifact'
+        uses: 'actions/upload-artifact@v2'
+        with:
+          if-no-files-found: 'error'
+          name: 'NuGet'
+          path: '${{ github.workspace }}/Project/bin/${{ github.event.inputs.buildConfiguration }}/*.*nupkg'
+          retention-days: 13
+    strategy:
+      matrix:
+        dotnet-version: ['6.x']
